@@ -1,0 +1,57 @@
+# ============================================================
+# PolitiGraph PoC – Python Dependencies
+# Python >= 3.11 recommended
+# ============================================================
+
+# --- Core ---
+python-dotenv>=1.0.0
+pydantic>=2.7.0
+pydantic-settings>=2.3.0
+loguru>=0.7.2
+tqdm>=4.66.0
+typer[all]>=0.12.0
+
+# --- Data Processing ---
+lxml>=5.2.0           # Fast TEI XML parsing
+pandas>=2.2.0
+numpy>=1.26.0
+python-dateutil>=2.9.0
+
+# --- NLP – Track A: GLiNER ---
+gliner>=0.2.9
+torch>=2.3.0          # CPU or CUDA build depending on hardware
+# torchvision>=0.18.0  # Uncomment if needed
+
+# --- NLP – Track B: LLM via Ollama ---
+ollama>=0.2.1          # Official Ollama Python client
+langchain>=0.2.0
+langchain-community>=0.2.0
+langchain-ollama>=0.1.0
+langgraph>=0.1.0       # Extraction pipeline state machine
+
+# --- Graph DB ---
+neo4j>=5.20.0          # Official Neo4j Python driver
+
+# --- Vector Store ---
+qdrant-client>=1.9.0
+
+# --- Embeddings ---
+sentence-transformers>=3.0.0
+transformers>=4.41.0
+huggingface_hub>=0.23.0
+
+# --- Analysis ---
+scikit-learn>=1.5.0    # Silhouette, ARI, KMeans
+umap-learn>=0.5.6      # UMAP dimensionality reduction
+textstat>=0.7.3        # Flesch-Kincaid, readability metrics
+scipy>=1.13.0
+
+# --- Visualization (optional, for notebook exploration) ---
+matplotlib>=3.9.0
+seaborn>=0.13.0
+plotly>=5.22.0
+
+# --- Testing ---
+pytest>=8.2.0
+pytest-asyncio>=0.23.0
+pytest-mock>=3.14.0
