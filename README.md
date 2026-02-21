@@ -1,7 +1,7 @@
 # PolitiGraph PoC
 ## Longitudinal Semantic Analysis of European Parliamentary Discourse
 
-A production-grade pipeline for ingesting ParlaMint XML data, extracting semantic entities and relationships via a hybrid NER/LLM approach, storing them in a Neo4j Knowledge Graph, and enabling longitudinal analysis of political rhetoric shifts from 2010 to the present.
+A production-grade pipeline for ingesting ParlaMint XML data, extracting semantic entities and relationships via a hybrid NER/LLM approach, storing them in a Neo4j Knowledge Graph, and enabling longitudinal analysis of political language.
 
 ---
 
@@ -11,61 +11,20 @@ A production-grade pipeline for ingesting ParlaMint XML data, extracting semanti
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        PolitiGraph Pipeline                         │
 │                                                                     │
-│  ┌──────────────┐    ┌────────────────────┐    ┌─────────────────┐ │
-│  │ Data Loaders │───▶│  NLP Engine        │───▶│ Graph Connector │ │
-│  │              │    │  Track A: GLiNER   │    │  Neo4j + PODIO  │ │
-│  │  ParlaMint   │    │  Track B: LLM      │    │  Ontology       │ │
-│  │  (TEI XML)   │    │  (Ollama/vLLM)     │    │                 │ │
-│  │  [Twitter*]  │    │  Pydantic schemas  │    │  Vector Index   │ │
-│  └──────────────┘    └────────────────────┘    └────────┬────────┘ │
+│  ┌──────────────┐    ┌────────────────────┐    ┌─────────────────┐  │
+│  │ Data Loaders │───▶│  NLP Engine        │───▶│ Graph Connector │  │
+│  │              │    │  Track A: GLiNER   │    │  Neo4j + PODIO  │  │
+│  │  ParlaMint   │    │  Track B: LLM      │    │  Ontology       │  │
+│  │  (TEI XML)   │    │  (Ollama/vLLM)     │    │                 │  │
+│  │  [Twitter*]  │    │  Pydantic schemas  │    │  Vector Index   │  │
+│  └──────────────┘    └────────────────────┘    └────────-────────┘  │
 │                                                          │          │
 │  ┌───────────────────────────────────────────────────────▼────────┐ │
-│  │                    Analysis Layer                               │ │
-│  │   Embeddings (mE5-large / XLM-R) │ UMAP │ ARI │ Silhouette    │ │
+│  │                    Analysis Layer                              │ │
+│  │   Embeddings (mE5-large / XLM-R) │ UMAP │ ARI │ Silhouette     │ │
 │  │   Cosine Drift │ Topic Salience  │ Complexity Metrics          │ │
-│  └─────────────────────────────────────────────────────────────── ┘ │
+│  └───────────────────────────────────────────────────────────────-┘ │
 └─────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Project Structure
-
-```
-politigraph/
-├── config/
-│   └── settings.py              # Pydantic-based settings from .env
-├── data_loaders/
-│   ├── base_loader.py           # Abstract base class
-│   ├── parlamint_loader.py      # TEI XML parser
-│   └── twitter_loader.py        # Stub for future Twitter/X ingestion
-├── nlp_engines/
-│   ├── base_extractor.py        # Abstract extractor interface
-│   ├── gliner_extractor.py      # Track A: high-precision NER
-│   ├── llm_extractor.py         # Track B: abstract topic + relation extraction
-│   └── pipeline.py              # Orchestrates both tracks, outputs JSON triples
-├── graph_connectors/
-│   ├── neo4j_connector.py       # Neo4j driver wrapper
-│   └── schema.py                # Ontology: PODIO + FOAF node/edge definitions
-├── embeddings/
-│   ├── embedding_module.py      # Multilingual embedding generation
-│   └── vector_store.py          # Qdrant sidecar / Neo4j vector index adapter
-├── analyzers/
-│   ├── longitudinal_analyzer.py # Cosine drift, topic salience over time
-│   ├── complexity_metrics.py    # TTR, Flesch-Kincaid, readability
-│   └── embedding_evaluator.py   # UMAP, Silhouette, ARI evaluation
-├── cypher/
-│   └── queries.cypher           # Curated Cypher query library
-├── scripts/
-│   ├── ingest.py                # CLI: run full ingestion
-│   ├── extract.py               # CLI: run NLP extraction on stored speeches
-│   └── analyze.py               # CLI: run longitudinal analysis
-├── tests/
-│   └── ...
-├── docker-compose.yml
-├── requirements.txt
-├── .env.example
-└── README.md
 ```
 
 ---
@@ -150,11 +109,3 @@ class MyNewLoader(BaseLoader):
     def get_metadata_schema(self) -> Dict[str, type]:
         ...
 ```
-
-No other code changes required.
-
----
-
-## Scientific Neutrality
-
-This pipeline quantifies **structure and patterns** of language — not ideological content. Sentiment scores, complexity metrics, and embedding distances are computed identically across all parties and time periods. No classifier is trained to label "populist" vs. "mainstream" speech; such labels must emerge from the data itself through clustering and drift analysis.
