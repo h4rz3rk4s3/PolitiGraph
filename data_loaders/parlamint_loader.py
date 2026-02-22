@@ -91,6 +91,7 @@ class ParlaMintLoader(BaseLoader):
         logger.info(f"[ParlaMintLoader] Found {len(xml_files)} XML files in {root_dir}")
 
         for xml_file in xml_files:
+            logger.info(f"[ParlaMintLoader] Parsing File: {xml_file}")
             # ParlaMint distributes a *-root.xml that includes others — skip it
             if xml_file.name.endswith("-root.xml") or xml_file.name.endswith("_root.xml"):
                 continue
@@ -110,12 +111,13 @@ class ParlaMintLoader(BaseLoader):
         # Determine root element (teiCorpus or TEI)
         tag = root.tag.split("}")[-1] if "}" in root.tag else root.tag
         if tag not in ("TEI", "teiCorpus"):
+            logger.warning("Not a ParlaMint document!!")
             return  # Not a ParlaMint document
 
         # ── Extract corpus-level metadata ──
         header = root.find(_ns("tei:teiHeader"))
         if header is None:
-            logger.debug(f"No teiHeader in {path.name}, skipping")
+            logger.info(f"No teiHeader in {path.name}, skipping")
             return
 
         session_id, session_date, language, subcorpus = self._extract_header_meta(header, path)
@@ -131,6 +133,7 @@ class ParlaMintLoader(BaseLoader):
         # ── Iterate utterances ──
         body = root.find(f".//{_ns('tei:body')}")
         if body is None:
+            logger.info("[ParlaMintLoader._parse_file] Empty Body!")
             return
 
         for u in body.iter(_ns("tei:u")):
@@ -142,7 +145,7 @@ class ParlaMintLoader(BaseLoader):
                 if doc is not None:
                     yield doc
             except Exception as e:
-                logger.debug(f"Skipping utterance in {path.name}: {e}")
+                logger.warning(f"Skipping utterance in {path.name}: {e}")
 
     def _extract_header_meta(
         self, header: ET.Element, path: Path
