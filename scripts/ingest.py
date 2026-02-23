@@ -4,9 +4,9 @@ scripts/ingest.py
 CLI entry point for ingesting ParlaMint XML data into Neo4j.
 
 Usage:
-    python scripts/ingest.py --country DE --data-dir data/raw/ParlaMint-DE
-    python scripts/ingest.py --country FR --data-dir data/raw/ParlaMint-FR --batch-size 200
-    python scripts/ingest.py --country DE --data-dir data/raw/ --dry-run
+    python scripts/ingest.py --country DE --data-dir parlamint_data/ParlaMint-DE
+    python scripts/ingest.py --country FR --data-dir parlamint_data/ParlaMint-FR --batch-size 200
+    python scripts/ingest.py --country DE --data-dir parlamint_data/ParlaMint-AT --dry-run
 """
 
 from __future__ import annotations

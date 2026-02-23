@@ -11,14 +11,14 @@ services:
   # Neo4j – Knowledge Graph + optional vector index
   # ----------------------------------------------------------
   neo4j:
-    image: neo4j:5.18-community
+    image: neo4j:5.25-community
     container_name: politigraph-neo4j
     restart: unless-stopped
     ports:
       - "7474:7474"   # HTTP Browser UI
       - "7687:7687"   # Bolt protocol
     environment:
-      NEO4J_AUTH: "${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-politigraph}"
+      NEO4J_AUTH: none #"${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-politigraph}"
       NEO4J_PLUGINS: '["apoc", "graph-data-science"]'
       NEO4J_dbms_memory_heap_initial__size: "1G"
       NEO4J_dbms_memory_heap_max__size: "4G"
@@ -39,20 +39,20 @@ services:
       start_period: 60s
 
   # ----------------------------------------------------------
-  # Qdrant – High-performance vector store (primary vector layer)
+  # Qdrant – vector store (primary vector layer)
   # ----------------------------------------------------------
   qdrant:
-    image: qdrant/qdrant:v1.9.2
+    image: qdrant/qdrant:v1.17
     container_name: politigraph-qdrant
     restart: unless-stopped
     ports:
       - "6333:6333"   # HTTP REST API
-      - "6334:6334"   # gRPC
+      #- "6334:6334"   # gRPC
     volumes:
       - qdrant_storage:/qdrant/storage
     environment:
       QDRANT__SERVICE__HTTP_PORT: 6333
-      QDRANT__SERVICE__GRPC_PORT: 6334
+      #QDRANT__SERVICE__GRPC_PORT: 6334
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:6333/readyz"]
       interval: 30s
@@ -64,18 +64,18 @@ services:
   # Default model: mistral:7b-instruct-q4_K_M (~4GB VRAM)
   # CPU fallback works but is ~10x slower
   # ----------------------------------------------------------
-  ollama:
-    image: ollama/ollama:latest
-    container_name: politigraph-ollama
-    restart: unless-stopped
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_models:/root/.ollama
-    environment:
-      OLLAMA_HOST: "0.0.0.0"
-      OLLAMA_NUM_PARALLEL: "2"
-      OLLAMA_MAX_LOADED_MODELS: "1"
+  #ollama:
+  #  image: ollama/ollama:latest
+  #  container_name: politigraph-ollama
+  #  restart: unless-stopped
+  #  ports:
+  #    - "11434:11434"
+  #  volumes:
+  #    - ollama_models:/root/.ollama
+  #  environment:
+  #    OLLAMA_HOST: "0.0.0.0"
+  #    OLLAMA_NUM_PARALLEL: "2"
+  #    OLLAMA_MAX_LOADED_MODELS: "1"
     # Uncomment for NVIDIA GPU support:
     # deploy:
     #   resources:
@@ -84,31 +84,31 @@ services:
     #         - driver: nvidia
     #           count: 1
     #           capabilities: [gpu]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+  #  healthcheck:
+  #    test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+  #    interval: 30s
+  #    timeout: 10s
+  #    retries: 3
+  #    start_period: 30s
 
   # ----------------------------------------------------------
   # Ollama model bootstrap – pulls the model on first start
   # ----------------------------------------------------------
-  ollama-bootstrap:
-    image: curlimages/curl:latest
-    container_name: politigraph-ollama-bootstrap
-    depends_on:
-      ollama:
-        condition: service_healthy
-    entrypoint: >
-      sh -c "
-        echo 'Pulling mistral:7b-instruct-q4_K_M...' &&
-        curl -s -X POST http://ollama:11434/api/pull
-          -H 'Content-Type: application/json'
-          -d '{\"name\": \"mistral:7b-instruct-q4_K_M\"}' &&
-        echo 'Model ready.'
-      "
-    restart: "no"
+  # ollama-bootstrap:
+  #  image: curlimages/curl:latest
+  #  container_name: politigraph-ollama-bootstrap
+  #  depends_on:
+  #    ollama:
+  #      condition: service_healthy
+  #  entrypoint: >
+  #    sh -c "
+  #      echo 'Pulling mistral:7b-instruct-q4_K_M...' &&
+  #      curl -s -X POST http://ollama:11434/api/pull
+  #        -H 'Content-Type: application/json'
+  #        -d '{\"name\": \"mistral:7b-instruct-q4_K_M\"}' &&
+  #      echo 'Model ready.'
+  #    "
+  #  restart: "no"
 
 # ----------------------------------------------------------
 # Volumes
@@ -119,4 +119,4 @@ volumes:
   neo4j_plugins:
   neo4j_import:
   qdrant_storage:
-  ollama_models:
+  #ollama_models:
